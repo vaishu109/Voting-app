@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: securevote-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  backend:
+    build: ./backend
+    container_name: securevote-api
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGODB_URI=mongodb://mongodb:27017/securevote
+      - JWT_SECRET=securevote_super_secret_jwt_key_12345
+      - JWT_REFRESH_SECRET=securevote_super_secret_refresh_jwt_key_54321
+      - MOCK_MAIL=true
+      - CLIENT_URL=http://localhost
+    depends_on:
+      - mongodb
+
+  frontend:
+    build: ./frontend
+    container_name: securevote-client
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:
